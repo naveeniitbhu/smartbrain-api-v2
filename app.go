@@ -15,8 +15,29 @@ type App struct {
 func (app *App) initialize() {
 	R := app.R
 	R.POST("/register", app.PostRegister)
+	R.POST("/signin", app.PostSignin)
 }
 
 func (app *App) PostRegister(c *gin.Context) {
 	api.PostRegister(c, app.Db)
 }
+
+// func (app *App) GetUsers(c *gin.Context) {
+// 	api.GetUsers(c, app.Db)
+// }
+
+func (app *App) PostSignin(c *gin.Context) {
+	api.PostSignin(c, app.Db)
+}
+
+// func (app *App) GetProfile(c *gin.Context) {
+// 	api.GetProfile(c, app.Db)
+// }
+
+// func (app *App) PutImage(c *gin.Context) {
+// 	api.PutImage(c, app.Db)
+// }
+
+// func (app *App) PostImageurl(c *gin.Context) {
+// 	api.PostImageurl(c, app.Db)
+// }
