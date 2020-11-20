@@ -31,6 +31,14 @@ type SignIn struct {
 	Password string `json:"password,omitempty" db:"hash"`
 }
 
+type Id struct {
+	ID int64 `json:"id,omitempty" db:"id"`
+}
+
+type Entries struct {
+	Entries int64 `json:"entries,omitempty" db:"entries"`
+}
+
 func PostRegister(c *gin.Context, db *sqlx.DB) {
 
 	var (
@@ -113,6 +121,9 @@ func PostSignin(c *gin.Context, db *sqlx.DB) {
 	}
 
 	rows, err := db.Queryx("SELECT * FROM users WHERE email=$1;", email)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	defer rows.Close()
 
@@ -130,4 +141,77 @@ func PostSignin(c *gin.Context, db *sqlx.DB) {
 		"entries": users.Entries,
 		"joined":  users.Joined,
 	})
+}
+
+func GetProfile(c *gin.Context, db *sqlx.DB) {
+
+	// c.Param returns a string so you have to convert it into int
+	// but it is working now without converting it ot int
+	// check the reason
+	// strconv.Atoi(z) to convert atring to int
+
+	id := c.Param("id")
+
+	users := Users{}
+
+	rows, err := db.Queryx("SELECT * FROM users WHERE id=$1;", id)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rows.StructScan(&users)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"id":      users.ID,
+		"name":    users.Name,
+		"email":   users.Email,
+		"entries": users.Entries,
+		"joined":  users.Joined,
+	})
+}
+
+func ImageCount(c *gin.Context, db *sqlx.DB) {
+
+	var (
+		id      Id
+		entries Entries
+	)
+
+	// bind the data to the struct defined by parsing the data as json
+
+	if err := c.ShouldBindJSON(&id); err == nil {
+		fmt.Println("INFO: json binding is done")
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"json binding error": err.Error()})
+	}
+
+	rows, err := db.Queryx("SELECT entries FROM users WHERE id=$1;", id.ID)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rows.StructScan(&entries)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+	entries.Entries += 1
+
+	var count int64
+
+	err = db.QueryRow(`UPDATE users SET entries=$1 RETURNING entries`, entries.Entries).Scan(&count)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	c.JSON(http.StatusOK, count)
 }

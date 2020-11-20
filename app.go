@@ -16,6 +16,8 @@ func (app *App) initialize() {
 	R := app.R
 	R.POST("/register", app.PostRegister)
 	R.POST("/signin", app.PostSignin)
+	R.GET("/profile/:id", app.GetProfile)
+	R.PUT("/image", app.ImageCount)
 }
 
 func (app *App) PostRegister(c *gin.Context) {
@@ -30,14 +32,10 @@ func (app *App) PostSignin(c *gin.Context) {
 	api.PostSignin(c, app.Db)
 }
 
-// func (app *App) GetProfile(c *gin.Context) {
-// 	api.GetProfile(c, app.Db)
-// }
+func (app *App) GetProfile(c *gin.Context) {
+	api.GetProfile(c, app.Db)
+}
 
-// func (app *App) PutImage(c *gin.Context) {
-// 	api.PutImage(c, app.Db)
-// }
-
-// func (app *App) PostImageurl(c *gin.Context) {
-// 	api.PostImageurl(c, app.Db)
-// }
+func (app *App) ImageCount(c *gin.Context) {
+	api.ImageCount(c, app.Db)
+}
