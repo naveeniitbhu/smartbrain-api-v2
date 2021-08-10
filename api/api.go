@@ -57,7 +57,12 @@ func PostRegister(c *gin.Context, db *sqlx.DB) {
 	if err == nil {
 		fmt.Printf("INFO: Login Details Inserted with id:%d & email:%s & name:%s\n", id, login.Email, login.Name)
 	} else {
-		log.Fatalln(err)
+		log.Println(err)
+		//print the message
+		c.JSON(http.StatusBadRequest, gin.H{
+			"Error": "Login details not inserted properly",
+		})
+		return
 	}
 
 	joined := time.Now()
